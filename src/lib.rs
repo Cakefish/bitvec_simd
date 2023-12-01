@@ -514,26 +514,16 @@ where
         self.nbits = nbits;
     }
 
-    /// Shink this bitvec to new length in-place.
-    /// Panics if new length is greater than original.
+    /// Shink the capacity of this bitvec with a lower bound.
     ///
-    /// Example:
+    /// Capacity will remain at least as large as the lower bound and the current length.
     ///
-    /// ```rust
-    /// use bitvec_simd::BitVec;
-    ///
-    /// let mut bitvec = BitVec::ones(3);
-    /// bitvec.shrink_to(2);
-    /// assert_eq!(bitvec.len(), 2);
-    /// ```
-    pub fn shrink_to(&mut self, nbits: usize) {
-        if nbits >= self.nbits {
-            panic!(
-                "nbits {} should be less than current value {}",
-                nbits, self.nbits
-            );
-        }
-        self.resize(nbits, false);
+    /// Unless, the current capacity is already lower than the limit, in which case this is a
+    /// no-op.
+    pub fn shrink_to(&mut self, min_capacity_bits: usize) {
+        let (i, bytes, bits) = Self::bit_to_len(min_capacity_bits);
+        let min_capacity = if bytes > 0 || bits > 0 { i + 1 } else { i };
+        self.storage.shrink_to(min_capacity);
     }
 
     /// Remove or add `index` to the set.

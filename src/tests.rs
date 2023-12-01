@@ -82,16 +82,16 @@ fn test_bit_vec_resize() {
 
 #[test]
 fn test_bit_vec_shrink_to() {
-    let mut bitvec = BitVec::ones(3333);
+    type T = BitVecSimd<u64x4, 4>;
+    let mut bitvec = T::ones(3333);
+    bitvec.resize(2222, false);
+    assert_eq!(bitvec.len(), 2222);
     bitvec.shrink_to(2222);
     assert_eq!(bitvec.len(), 2222);
-}
-
-#[test]
-#[should_panic]
-fn test_bit_vec_shrink_to_painc() {
-    let mut bitvec = BitVec::ones(3333);
-    bitvec.shrink_to(4444);
+    assert!(bitvec.storage_capacity() >= 2222 / u64x4::BIT_WIDTH);
+    bitvec.shrink_to(5);
+    assert_eq!(bitvec.len(), 2222);
+    assert!(bitvec.storage_capacity() >= 2222 / u64x4::BIT_WIDTH);
 }
 
 #[test]
